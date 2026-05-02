@@ -231,7 +231,7 @@ TRIGGER:
   Suppression key: {suppression_key}
 {customer_block}{history_block}
 
-Return ONLY this JSON (no markdown, no explanation):
+Return ONLY this JSON (strictly valid JSON, no markdown, no explanation. Do NOT use literal newlines inside string values):
 {{
   "body": "<the WhatsApp message>",
   "cta": "<open_ended | binary_yes_stop | none>",
@@ -261,7 +261,7 @@ Return ONLY this JSON (no markdown, no explanation):
         result = json.loads(raw)
         return result
     except Exception as e:
-        print(f"[ERROR] compose failed: {e}")
+        print(f"[ERROR] compose failed: {e}\nRAW: {raw}")
         # Fallback: minimal valid response
         return {
             "body": f"Hi {owner}, quick update from Vera on your {merchant.get('category_slug', 'business')} — shall we connect?",
