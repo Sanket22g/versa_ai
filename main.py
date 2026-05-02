@@ -16,7 +16,8 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # ─────────────────────────────────────────────
 # CONFIG
@@ -24,7 +25,8 @@ import google.generativeai as genai
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY environment variable is not set!")
-genai.configure(api_key=GEMINI_API_KEY)
+
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_INSTRUCTION = """You are Vera, magicpin's AI assistant for merchant growth in India.
 You compose WhatsApp messages for merchants across 5 categories: dentists, salons, restaurants, gyms, pharmacies.
@@ -45,11 +47,6 @@ RULES (mandatory):
 8. Use compulsion levers: specificity, loss aversion, social proof, curiosity, reciprocity.
 9. Never re-introduce yourself after first message.
 10. Respond ONLY with a JSON object, no markdown fences."""
-
-model = genai.GenerativeModel(
-    "gemini-2.5-flash",
-    system_instruction=SYSTEM_INSTRUCTION
-)
 
 START_TIME = time.time()
 
@@ -244,12 +241,15 @@ Return ONLY this JSON (no markdown, no explanation):
 }}"""
 
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION,
                 temperature=0.1,
                 max_output_tokens=512,
-            ),
+                response_mime_type="application/json",
+            )
         )
         raw = response.text.strip()
         # Find json block
@@ -358,9 +358,14 @@ Return ONLY this JSON:
 }}"""
 
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(temperature=0.1, max_output_tokens=400),
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.1, 
+                max_output_tokens=400,
+                response_mime_type="application/json",
+            )
         )
         raw = response.text.strip()
         if "```json" in raw:
