@@ -243,7 +243,7 @@ Return ONLY this JSON (strictly valid JSON, no markdown, no explanation. Do NOT 
     raw = ""
     try:
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTION,
@@ -362,7 +362,7 @@ Return ONLY this JSON:
     raw = ""
     try:
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.1, 
