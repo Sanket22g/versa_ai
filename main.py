@@ -268,7 +268,7 @@ Return ONLY this JSON (strictly valid JSON, no markdown, no explanation. Do NOT 
             "cta": "open_ended",
             "send_as": send_as,
             "suppression_key": suppression_key,
-            "rationale": f"Fallback due to compose error: {str(e)[:80]}"
+            "rationale": f"Fallback error: {e}. RAW OUTPUT: {raw[:100]}"
         }
 
 
