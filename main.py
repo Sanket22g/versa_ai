@@ -252,9 +252,12 @@ Return ONLY this JSON (no markdown, no explanation):
             ),
         )
         raw = response.text.strip()
-        # Strip markdown fences if any
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```$", "", raw)
+        # Find json block
+        if "```json" in raw:
+            raw = raw.split("```json")[1].split("```")[0].strip()
+        elif "```" in raw:
+            raw = raw.split("```")[1].split("```")[0].strip()
+            
         result = json.loads(raw)
         return result
     except Exception as e:
@@ -360,8 +363,11 @@ Return ONLY this JSON:
             generation_config=genai.types.GenerationConfig(temperature=0.1, max_output_tokens=400),
         )
         raw = response.text.strip()
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```$", "", raw)
+        if "```json" in raw:
+            raw = raw.split("```json")[1].split("```")[0].strip()
+        elif "```" in raw:
+            raw = raw.split("```")[1].split("```")[0].strip()
+            
         result = json.loads(raw)
         return result
     except Exception as e:
