@@ -240,17 +240,19 @@ Return ONLY this JSON (strictly valid JSON, no markdown, no explanation. Do NOT 
   "rationale": "<1 sentence: why this message, what trigger, what compulsion lever>"
 }}"""
 
+    raw = ""
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTION,
                 temperature=0.1,
-                max_output_tokens=512,
                 response_mime_type="application/json",
             )
         )
+        if response.candidates and response.candidates[0].finish_reason:
+            print(f"[DEBUG] finish_reason: {response.candidates[0].finish_reason.name}")
         raw = response.text.strip()
         # Find json block
         if "```json" in raw:
@@ -357,13 +359,13 @@ Return ONLY this JSON:
   "rationale": "<1 sentence why>"
 }}"""
 
+    raw = ""
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.1, 
-                max_output_tokens=400,
                 response_mime_type="application/json",
             )
         )
