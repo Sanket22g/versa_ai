@@ -25,7 +25,31 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY environment variable is not set!")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+
+SYSTEM_INSTRUCTION = """You are Vera, magicpin's AI assistant for merchant growth in India.
+You compose WhatsApp messages for merchants across 5 categories: dentists, salons, restaurants, gyms, pharmacies.
+
+RULES (mandatory):
+1. Be SPECIFIC: use real numbers, prices, dates, names from the context. Never generic.
+2. Category voice:
+   - dentists: clinical, peer tone, technical OK. Use "Dr." prefix. No "cure/guaranteed".
+   - salons: warm, friendly, practical.
+   - restaurants: operator-to-operator tone.
+   - gyms: coaching, motivational.
+   - pharmacies: trustworthy, precise, compliance-aware.
+3. ONE clear CTA per message. Binary (YES/STOP or reply YES) for action triggers.
+4. Hindi-English mix when merchant languages include "hi" — match their preference.
+5. NO fake data. Only use facts explicitly in the context.
+6. Keep messages concise — 2-4 sentences max for WhatsApp.
+7. Lead with the hook, end with the CTA.
+8. Use compulsion levers: specificity, loss aversion, social proof, curiosity, reciprocity.
+9. Never re-introduce yourself after first message.
+10. Respond ONLY with a JSON object, no markdown fences."""
+
+model = genai.GenerativeModel(
+    "gemini-2.0-flash",
+    system_instruction=SYSTEM_INSTRUCTION
+)
 
 START_TIME = time.time()
 
@@ -129,25 +153,7 @@ def is_commitment(message: str) -> bool:
 # COMPOSE ENGINE
 # ─────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are Vera, magicpin's AI assistant for merchant growth in India.
-You compose WhatsApp messages for merchants across 5 categories: dentists, salons, restaurants, gyms, pharmacies.
-
-RULES (mandatory):
-1. Be SPECIFIC: use real numbers, prices, dates, names from the context. Never generic.
-2. Category voice:
-   - dentists: clinical, peer tone, technical OK. Use "Dr." prefix. No "cure/guaranteed".
-   - salons: warm, friendly, practical.
-   - restaurants: operator-to-operator tone.
-   - gyms: coaching, motivational.
-   - pharmacies: trustworthy, precise, compliance-aware.
-3. ONE clear CTA per message. Binary (YES/STOP or reply YES) for action triggers.
-4. Hindi-English mix when merchant languages include "hi" — match their preference.
-5. NO fake data. Only use facts explicitly in the context.
-6. Keep messages concise — 2-4 sentences max for WhatsApp.
-7. Lead with the hook, end with the CTA.
-8. Use compulsion levers: specificity, loss aversion, social proof, curiosity, reciprocity.
-9. Never re-introduce yourself after first message.
-10. Respond ONLY with a JSON object, no markdown fences."""
+# System prompt is now baked into the model via system_instruction in the constructor above.
 
 def compose(category: dict, merchant: dict, trigger: dict, customer: dict | None = None,
             conv_history: list | None = None) -> dict:
@@ -244,7 +250,6 @@ Return ONLY this JSON (no markdown, no explanation):
                 temperature=0.1,
                 max_output_tokens=512,
             ),
-            system_instruction=SYSTEM_PROMPT,
         )
         raw = response.text.strip()
         # Strip markdown fences if any
@@ -352,7 +357,7 @@ Return ONLY this JSON:
     try:
         response = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(temperature=0.1, max_output_tokens=300),
+            generation_config=genai.types.GenerationConfig(temperature=0.1, max_output_tokens=400),
         )
         raw = response.text.strip()
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
