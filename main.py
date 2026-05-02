@@ -258,7 +258,7 @@ Return ONLY this JSON (strictly valid JSON, no markdown, no explanation. Do NOT 
         elif "```" in raw:
             raw = raw.split("```")[1].split("```")[0].strip()
             
-        result = json.loads(raw)
+        result = json.loads(raw, strict=False)
         return result
     except Exception as e:
         print(f"[ERROR] compose failed: {e}\nRAW: {raw}")
@@ -373,7 +373,7 @@ Return ONLY this JSON:
         elif "```" in raw:
             raw = raw.split("```")[1].split("```")[0].strip()
             
-        result = json.loads(raw)
+        result = json.loads(raw, strict=False)
         return result
     except Exception as e:
         print(f"[ERROR] compose_reply failed: {e}")
