@@ -47,7 +47,7 @@ RULES (mandatory):
 10. Respond ONLY with a JSON object, no markdown fences."""
 
 model = genai.GenerativeModel(
-    "gemini-2.0-flash",
+    "gemini-2.5-flash",
     system_instruction=SYSTEM_INSTRUCTION
 )
 
